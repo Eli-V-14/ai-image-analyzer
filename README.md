@@ -2,7 +2,7 @@
 This project explores the simple ideology of frontend and backend development by developing a web application tool that uses Google's Gemini-Flash-Latest model. The application provides descriptive feedback of an image uploaded with a text box to allow users to ask information about the image. The project also develops my skills in using APIs to devleop launchable applications through my localhost, which can be further developed into a mobile phone application or more. 
 
 
-# Python Libraries
+# Python Libraries/Dependencies
 - **fastapi** : used to create the API and handle file uploads
     - 'pip install fastapi'
 - **google** : used to interact with the Gemini API

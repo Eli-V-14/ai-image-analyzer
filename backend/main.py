@@ -1,6 +1,5 @@
 """
-AI Image Captioner - Backend
-Dependencies: pip install fastapi uvicorn google-genai python-multipart python-dotenv
+AI Image Analyzer - Backend
 """
 
 from fastapi import FastAPI, UploadFile, Form 
@@ -23,21 +22,22 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-# Defining different prompts to the model
-STYLE_PROMPTS = {
-    "descriptive": "Write a clear, detailed caption describing this image.",
-    "poetic":      "Write a poetic, lyrical caption for this image.",
-    "funny":       "Write a witty and funny caption for this image.",
-    "seo":         "Write an SEO-friendly alt-text caption with relevant keywords.",
-    "minimal":     "Write a minimal caption under 10 words.",
-}
-
 # API endpoint to handle image captioning requests
 @app.post("/caption")
-async def caption_image(file: UploadFile, style: str = Form("descriptive")):
+async def caption_image(file: UploadFile, prompt: str = Form(...)):
     image_data = base64.b64encode(await file.read()).decode("utf-8")
-    prompt = STYLE_PROMPTS.get(style, STYLE_PROMPTS["descriptive"])
-    image_part = types.Part.from_bytes(data=base64.b64decode(image_data), mime_type=file.content_type)
-    response = client.models.generate_content(model="gemini-flash-latest", contents=[image_part, prompt + " Reply with only the caption."])
+
+    image_part = types.Part.from_bytes(
+        data=base64.b64decode(image_data), 
+        mime_type=file.content_type
+    )
+
+    response = client.models.generate_content(
+        model="gemini-flash-latest", 
+        contents=[
+            image_part, 
+            prompt + " Reply with only the answer."
+        ]
+    )
     
     return {"caption": response.text.strip()}
