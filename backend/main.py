@@ -3,13 +3,12 @@ AI Image Captioner - Backend
 Dependencies: pip install fastapi uvicorn google-genai python-multipart python-dotenv
 """
 
-from fastapi import FastAPI, UploadFile, Form
+from fastapi import FastAPI, UploadFile, Form 
 from fastapi.middleware.cors import CORSMiddleware
-from google import genai
+from google import genai # google - used for genai.Client and genai.types.Part
 from google.genai import types
 import base64, os
 from dotenv import load_dotenv
-
 
 # Load API key from .env and initialize clients
 load_dotenv()
