@@ -2,19 +2,17 @@
 AI Image Analyzer - Backend
 """
 
-from fastapi import FastAPI, UploadFile, Form 
+from fastapi import FastAPI, UploadFile, Form
 from fastapi.middleware.cors import CORSMiddleware
-from google import genai # google - used for genai.Client and genai.types.Part
+from google import genai
 from google.genai import types
 import base64, os
 from dotenv import load_dotenv
 
-# Load API key from .env and initialize clients
 load_dotenv()
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 app = FastAPI()
 
-# Allow requests from the React frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173"],
@@ -22,22 +20,21 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-# API endpoint to handle image captioning requests
-@app.post("/caption")
-async def caption_image(file: UploadFile, prompt: str = Form(...)):
-    image_data = base64.b64encode(await file.read()).decode("utf-8")
+@app.post("/analyze")
+async def analyze_image(file: UploadFile, prompt: str = Form(...)):
+    image_bytes = await file.read()
 
+    # Pass raw bytes directly — no need to encode then decode
     image_part = types.Part.from_bytes(
-        data=base64.b64decode(image_data), 
+        data=image_bytes,
         mime_type=file.content_type
     )
 
     response = client.models.generate_content(
-        model="gemini-flash-latest", 
-        contents=[
-            image_part, 
-            prompt + " Reply with only the answer."
-        ]
+        model="gemini-2.0-flash",  # free tier, fast, supports vision
+        contents=[image_part, prompt]
     )
-    
-    return {"caption": response.text.strip()}
+
+    print("RESPONSE:", response.text)  # visible in your uvicorn terminal for debugging
+
+    return {"response": response.text.strip()}

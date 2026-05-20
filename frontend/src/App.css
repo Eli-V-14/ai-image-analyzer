@@ -1,0 +1,316 @@
+@import url("https://fonts.googleapis.com/css2?family=Syne:wght@400;600;800&family=DM+Mono:wght@400;500&display=swap");
+
+/* ── VARIABLES ── */
+:root {
+  --bg:             #0b0b10;
+  --surface:        #111118;
+  --surface-2:      #18181f;
+  --border:         #22223a;
+  --border-hover:   #44446a;
+  --accent:         #7c6fff;
+  --accent-hover:   #6050dd;
+  --accent-glow:    #7c6fff15;
+  --text-primary:   #eeeeff;
+  --text-secondary: #7777aa;
+  --text-muted:     #3d3d55;
+  --danger:         #ff4455;
+  --danger-bg:      #ff445510;
+  --danger-border:  #ff445530;
+  --header-h:       52px;
+  --ease:           0.16s ease;
+  --radius:         10px;
+  --radius-lg:      14px;
+}
+
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body, #root {
+  height: 100%;          /* make root fill full viewport */
+  overflow: hidden;      /* no page scroll ever */
+}
+
+body {
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: "Syne", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── APP SHELL ──
+   Flex column: header on top, grid fills the rest.
+   height: 100% ensures it never exceeds the viewport.
+── */
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* ── HEADER ── */
+.header {
+  height: var(--header-h);
+  flex-shrink: 0;           /* never compress the header */
+  display: flex;
+  align-items: center;
+  padding: 0 1.5rem;
+  border-bottom: 1px solid var(--border);
+  gap: 1rem;
+}
+
+.header-title {
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.header-sub {
+  font-family: "DM Mono", monospace;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  margin-left: auto;
+}
+
+/* ── FOUR-QUADRANT GRID ──
+   2 columns × 2 rows.
+   calc(100% - header-h) means the grid fills exactly
+   the remaining vertical space — no scroll needed.
+── */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  height: calc(100% - var(--header-h));
+}
+
+/* ── QUADRANT BASE ──
+   Every quadrant is a flex column with a border
+   separating it from its neighbours.
+── */
+.quadrant {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.25rem 1.5rem;
+  overflow: hidden;         /* content never punches outside its cell */
+}
+
+/* Grid dividers using borders on specific edges */
+.q-top-left    { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.q-top-right   { border-bottom: 1px solid var(--border); }
+.q-bottom-left { border-right: 1px solid var(--border); }
+.q-bottom-right { /* no extra borders needed */ }
+
+/* ── QUADRANT LABEL ── */
+.quad-label {
+  font-family: "DM Mono", monospace;
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+/* ── TOP LEFT: PRESET BUTTONS ──
+   Fill the quadrant height evenly using flex with stretch.
+── */
+.presets {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  flex: 1;               /* stretch to fill remaining quadrant space */
+}
+
+.preset-btn {
+  flex: 1;               /* each button grows to share available height equally */
+  padding: 0 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-family: "Syne", sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  transition: all var(--ease);
+}
+
+.preset-btn:hover   { border-color: var(--accent); color: var(--text-primary); background: var(--surface-2); }
+.preset-btn--active { border-color: var(--accent); background: var(--accent-glow); color: var(--accent); }
+
+/* ── TOP RIGHT: DROP ZONE ──
+   flex: 1 makes the drop zone fill the remaining
+   space inside the quadrant after the label.
+── */
+.drop-zone {
+  flex: 1;
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color var(--ease), background var(--ease);
+  overflow: hidden;
+  background: var(--surface);
+  position: relative;
+}
+
+.drop-zone:hover    { border-color: var(--accent); background: var(--surface-2); }
+.drop-zone--drag    { border-color: var(--accent); background: var(--accent-glow); }
+.drop-zone--filled  { border-style: solid; border-color: var(--border-hover); }
+
+.preview-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.drop-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  pointer-events: none;
+}
+
+.drop-arrow { font-size: 1.75rem; color: var(--text-muted); line-height: 1; }
+.drop-text  { font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); }
+.drop-sub   { font-size: 0.72rem; color: var(--text-muted); }
+
+.filename {
+  font-family: "DM Mono", monospace;
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── BOTTOM LEFT: TEXTAREA + ACTIONS ── */
+.textarea {
+  flex: 1;               /* textarea expands to fill remaining quadrant height */
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text-primary);
+  font-family: "Syne", sans-serif;
+  font-size: 0.85rem;
+  line-height: 1.65;
+  resize: none;          /* no resize handle — size is controlled by flex */
+  transition: border-color var(--ease);
+}
+
+.textarea:focus        { outline: none; border-color: var(--accent); }
+.textarea::placeholder { color: var(--text-muted); }
+
+.actions {
+  display: flex;
+  gap: 0.6rem;
+  flex-shrink: 0;
+}
+
+.btn {
+  padding: 0.65rem 1.1rem;
+  border-radius: var(--radius);
+  font-family: "Syne", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--ease);
+  border: none;
+}
+
+.btn-primary                      { background: var(--accent); color: #fff; flex: 1; }
+.btn-primary:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-1px); }
+.btn-primary:disabled             { opacity: 0.28; cursor: not-allowed; transform: none; }
+
+.btn-ghost       { background: transparent; border: 1px solid var(--border); color: var(--text-secondary); }
+.btn-ghost:hover { border-color: var(--border-hover); color: var(--text-primary); }
+
+/* ── BOTTOM RIGHT: RESPONSE ── */
+
+/* Shared base for all response states */
+.response-state {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-lg);
+  font-size: 0.85rem;
+  gap: 0.75rem;
+}
+
+.response-loading {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-secondary);
+}
+
+.response-error {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 1rem 1.25rem;
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-border);
+  color: var(--danger);
+}
+
+.error-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 0.25rem;
+}
+
+.response-empty {
+  border: 1.5px dashed var(--border);
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  text-align: center;
+}
+
+/* The actual result box — scrollable if text is long */
+.response-result {
+  flex: 1;
+  border: 1px solid var(--border-hover);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  padding: 1.1rem 1.25rem;
+  overflow-y: auto;      /* scroll inside the box, not the page */
+}
+
+/* Custom scrollbar to match dark theme */
+.response-result::-webkit-scrollbar       { width: 4px; }
+.response-result::-webkit-scrollbar-track { background: transparent; }
+.response-result::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 4px; }
+
+.response-text {
+  font-family: "DM Mono", monospace;
+  font-size: 0.8rem;
+  line-height: 1.9;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+}
+
+/* ── SPINNER ── */
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.spinner {
+  width: 15px;
+  height: 15px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+  flex-shrink: 0;
+}
